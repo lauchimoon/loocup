@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
 
+    "github.com/lauchimoon/loocup/lexer"
     "github.com/lauchimoon/loocup/function"
 )
 
@@ -17,4 +18,7 @@ func main() {
     fmt.Println("f:", f)
     fmt.Println("g:", g)
     fmt.Println("f matches g criteria?", f.MatchesCriteria(g))
+
+    l := lexer.LexerMake("int f(int a, int b) { return a + b; }")
+    fmt.Println(l.Lex())
 }
