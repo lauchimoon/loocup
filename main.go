@@ -19,6 +19,8 @@ func main() {
     fmt.Println("g:", g)
     fmt.Println("f matches g criteria?", f.MatchesCriteria(g))
 
-    l := lexer.LexerMake("int f(int a, int b) { return a + b; }")
-    fmt.Println(l.Lex())
+    fmt.Println(lexer.LexerMake("int *f(int a, int b) { return a + b; }").Lex())
+    fmt.Println(lexer.LexerMake("int *f(int a[12], int b) { return a[0xbeef] * b; }").Lex())
+    fmt.Println(lexer.LexerMake("// Hello world").Lex())
+    fmt.Println(lexer.LexerMake("/* Hello world */").Lex())
 }
