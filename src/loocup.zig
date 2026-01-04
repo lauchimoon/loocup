@@ -13,6 +13,10 @@ pub fn FuncArg() type {
                 .name = name,
             };
         }
+
+        pub fn eql(self: Self, other: Self) bool {
+            return std.mem.eql(u8, self.typ, other.typ);
+        }
     };
 }
 
@@ -52,12 +56,36 @@ pub fn Function() type {
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
     const capacity: usize = 256;
-    var args: ArgList = try ArgList.initCapacity(allocator, capacity);
-    defer args.deinit(allocator);
+    var argsf: ArgList = try ArgList.initCapacity(allocator, capacity);
+    defer argsf.deinit(allocator);
 
-    try args.append(allocator, FuncArg().init("int", "a"));
-    try args.append(allocator, FuncArg().init("int", "b"));
+    var argsg: ArgList = try ArgList.initCapacity(allocator, capacity);
+    defer argsg.deinit(allocator);
 
-    const f = Function().init("int", "add", args);
+    try argsf.append(allocator, FuncArg().init("int", "a"));
+    try argsf.append(allocator, FuncArg().init("int", "b"));
+
+    try argsg.append(allocator, FuncArg().init("int", "a"));
+    try argsg.append(allocator, FuncArg().init("int", "b"));
+
+    const f = Function().init("int", "f", argsf);
+    const g = Function().init("bool", "g", argsg);
     f.print();
+    g.print();
+
+    std.debug.print("{}\n", .{functionsMatch(f, g)});
+}
+
+// Function names doesn't matter for now, we care about return type and arguments' type
+pub fn functionsMatch(f: Function(), g: Function()) bool {
+    const f_args_len = f.args.items.len;
+    if (g.args.items.len != f.args.items.len) return false;
+
+    for (0..f_args_len) |i| {
+        const f_arg = f.args.items[i];
+        const g_arg = g.args.items[i];
+        if (!f_arg.eql(g_arg)) return false;
+    }
+
+    return std.mem.eql(u8, f.ret_type, g.ret_type);
 }
