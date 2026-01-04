@@ -7,6 +7,5 @@ Essentially [Hoogle](https://hoogle.haskell.org/) for C. Inspired by [Coogle](ht
 ```sh
 $ git clone https://github.com/lauchimoon/loocup.git
 $ cd loocup/
-$ zig build -p .
+$ go build .
 ```
-This generates a single directory `bin` inside the current working directory, in which `loocup` is at.
