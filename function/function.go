@@ -1,7 +1,6 @@
 package function
 
 import (
-    "fmt"
     "slices"
     "strings"
 
@@ -39,23 +38,22 @@ func MakeFromTokens(tokens []token.Token) Function {
         Kind: token.TOKEN_OPEN_PAREN, Value: "(",
     })
 
-    // TODO: consider modifiers like unsigned, signed...
+    // TODO: consider modifiers like unsigned, signed, pointers...
     retType := tokens[0].Value
+    name := tokens[openParenIndex - 1].Value
     args := ""
     argList := tokens[openParenIndex + 1:semicolonIndex]
     i := 0
     for i < len(argList) - 1 {
-        nextArg := argList[i + 1]
-        if nextArg.Kind == token.TOKEN_COMMA || nextArg.Kind == token.TOKEN_CLOSE_PAREN {
-            i++
-        }
-
         args += argList[i].Value + " "
         i++
     }
 
     fString := retType + "(" + args + ")"
-    return MakeFromSignature(fString)
+    f := MakeFromSignature(fString)
+    f.Name = name
+
+    return f
 }
 
 func getArgs(sig string) []FuncArg {
@@ -64,9 +62,19 @@ func getArgs(sig string) []FuncArg {
     argsSig := sig[openParenIndex+1:closeParenIndex]
 
     args := []FuncArg{}
-    for i, typ := range strings.Split(argsSig, ",") {
-        typ = strings.Trim(typ, " ")
-        args = append(args, FuncArgMake(typ, fmt.Sprintf("x%d", i)))
+    for _, arg := range strings.Split(argsSig, ",") {
+        fields := strings.Fields(strings.Trim(arg, " "))
+        if len(fields) < 1 {
+            continue
+        }
+
+        argType := fields[0]
+        var argName string
+
+        if len(fields) >= 2 {
+            argName = fields[1]
+        }
+        args = append(args, FuncArgMake(argType, argName))
     }
 
     return args
