@@ -13,8 +13,8 @@ const (
 )
 
 func main() {
-    f := function.MakeFromSignature("int(int, int)")
-    g := function.MakeFromSignature("bool(int, int)")
+    f := function.MakeFromTokens(lexer.LexerMake("int add(int a, int b);").Lex())
+    g := function.MakeFromTokens(lexer.LexerMake("bool add(int a, int b);").Lex())
 
     fmt.Println("f:", f)
     fmt.Println("g:", g)

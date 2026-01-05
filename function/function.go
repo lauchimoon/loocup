@@ -2,7 +2,11 @@ package function
 
 import (
     "fmt"
+    "slices"
     "strings"
+
+    "github.com/lauchimoon/loocup/parser"
+    "github.com/lauchimoon/loocup/token"
 )
 
 type Function struct {
@@ -23,6 +27,35 @@ func MakeFromSignature(sig string) Function {
     openParenIndex := strings.IndexByte(sig, '(')
     retType := sig[:openParenIndex]
     return Make(retType, "x", getArgs(sig))
+}
+
+func MakeFromTokens(tokens []token.Token) Function {
+    isFuncDecl, semicolonIndex := parser.IsFunctionDeclaration(tokens, 0)
+    if !isFuncDecl {
+        return Function{"", "", []FuncArg{}}
+    }
+
+    openParenIndex := slices.Index[[]token.Token, token.Token](tokens, token.Token{
+        Kind: token.TOKEN_OPEN_PAREN, Value: "(",
+    })
+
+    // TODO: consider modifiers like unsigned, signed...
+    retType := tokens[0].Value
+    args := ""
+    argList := tokens[openParenIndex + 1:semicolonIndex]
+    i := 0
+    for i < len(argList) - 1 {
+        nextArg := argList[i + 1]
+        if nextArg.Kind == token.TOKEN_COMMA || nextArg.Kind == token.TOKEN_CLOSE_PAREN {
+            i++
+        }
+
+        args += argList[i].Value + " "
+        i++
+    }
+
+    fString := retType + "(" + args + ")"
+    return MakeFromSignature(fString)
 }
 
 func getArgs(sig string) []FuncArg {
