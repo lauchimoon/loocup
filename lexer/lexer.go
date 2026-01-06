@@ -44,7 +44,7 @@ func (l *Lexer) Lex() []token.Token {
         buffer := strings.Builder{}
 
         // Skip whitespace
-        if unicode.IsSpace(rune(c)) {
+        if c != '\n' && unicode.IsSpace(rune(c)) {
             l.Advance()
             c = l.Current()
             for unicode.IsSpace(rune(c)) {
@@ -158,6 +158,31 @@ func (l *Lexer) Lex() []token.Token {
             }
         }
 
+        // Preprocessor directives
+        // TODO: support multi-line preprocessor directives (macros...)
+        if c == '#' {
+            l.Advance()
+            tokens = append(tokens, token.Token{
+                Kind: token.TOKEN_PREPROC,
+                Value: "#",
+            })
+
+            c = l.Current()
+            for c != '\n' {
+                buffer.WriteByte(c)
+                l.Advance()
+                if l.Cursor >= l.SourceLen {
+                    break
+                }
+                c = l.Current()
+            }
+
+            tokens = append(tokens, token.Token{
+                Kind: token.TOKEN_PREPROC,
+                Value: buffer.String(),
+            })
+        }
+
         // Others
         if c == '(' {
             tokens = append(tokens, token.Token{
@@ -203,6 +228,11 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.TOKEN_OPERATOR,
                 Value: string(c),
+            })
+        } else if c == '\n' {
+            tokens = append(tokens, token.Token{
+                Kind: token.TOKEN_NEWLINE,
+                Value: "\n",
             })
         }
 
