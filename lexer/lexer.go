@@ -80,12 +80,12 @@ func (l *Lexer) Lex() []token.Token {
         }
 
         // Symbols / keywords
-        if unicode.IsLetter(rune(c)) {
+        if unicode.IsLetter(rune(c)) || c == '_' {
             buffer.WriteByte(c)
             l.Advance()
             c = l.Current()
 
-            for unicode.IsLetter(rune(c)) || unicode.IsDigit(rune(c)) {
+            for unicode.IsLetter(rune(c)) || unicode.IsDigit(rune(c)) || c == '_' {
                 buffer.WriteByte(c)
                 l.Advance()
                 c = l.Current()
@@ -232,7 +232,7 @@ func (l *Lexer) Lex() []token.Token {
         } else if c == '\n' {
             tokens = append(tokens, token.Token{
                 Kind: token.TOKEN_NEWLINE,
-                Value: "\n",
+                Value: "\\n",
             })
         }
 
