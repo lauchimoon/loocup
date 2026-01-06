@@ -13,7 +13,7 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     }
 
     // TODO: check for modifiers like unsigned, signed...
-    if tokens[idx].Kind == token.TOKEN_KEYWORD && !isPrimitiveType(tokens[idx].Value) {
+    if tokens[idx].Kind == token.TOKEN_KEYWORD && !isRelevantKeyword(tokens[idx].Value) {
         return false, -1
     }
 
@@ -88,16 +88,17 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     return true, idx
 }
 
-func isPrimitiveType(s string) bool {
+func isRelevantKeyword(s string) bool {
     types := []string{
         "char", "double", "float",
         "int", "long", "short",
-        "void",
+        "void", "const", "unsigned",
+        "signed",
     }
 
     return slices.Index[[]string, string](types, s) != -1
 }
 
 func isWord(t token.Token) bool {
-    return t.Kind == token.TOKEN_SYMBOL || (t.Kind == token.TOKEN_KEYWORD && isPrimitiveType(t.Value))
+    return t.Kind == token.TOKEN_SYMBOL || (t.Kind == token.TOKEN_KEYWORD && isRelevantKeyword(t.Value))
 }
