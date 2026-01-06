@@ -39,7 +39,11 @@ func MakeFromTokens(tokens []token.Token) Function {
     })
 
     // TODO: consider modifiers like unsigned, signed, pointers...
-    retType := tokens[0].Value
+    retType := ""
+    for _, t := range tokens[:openParenIndex - 1] {
+        retType += t.Value + " "
+    }
+
     name := tokens[openParenIndex - 1].Value
     args := ""
     argList := tokens[openParenIndex + 1:semicolonIndex]
@@ -71,9 +75,11 @@ func getArgs(sig string) []FuncArg {
         argType := fields[0]
         var argName string
 
+        // TODO: check for pointers, like int *...
         if len(fields) >= 2 {
             argName = fields[1]
         }
+
         args = append(args, FuncArgMake(argType, argName))
     }
 
