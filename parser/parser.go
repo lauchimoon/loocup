@@ -23,6 +23,11 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     // In case we have pointers or something else
     if tokens[idx].Kind != token.TOKEN_SYMBOL {
         for idx < len(tokens) && tokens[idx].Kind != token.TOKEN_SYMBOL {
+            // We found semicolon before another symbol or opening parenthesis.
+            if tokens[idx].Kind == token.TOKEN_SEMICOLON {
+                return false, -1
+            }
+
             idx++
         }
     }
@@ -41,9 +46,10 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     // Parse arguments
     idx++
 
-    if !isWord(tokens[idx]) {
+    if !isWord(tokens[idx]) && tokens[idx].Kind != token.TOKEN_CLOSE_PAREN {
         return false, -1
     }
+
 
     for tokens[idx].Kind != token.TOKEN_CLOSE_PAREN {
         if tokens[idx].Kind == token.TOKEN_COMMA {
@@ -86,6 +92,7 @@ func isPrimitiveType(s string) bool {
     types := []string{
         "char", "double", "float",
         "int", "long", "short",
+        "void",
     }
 
     return slices.Index[[]string, string](types, s) != -1
