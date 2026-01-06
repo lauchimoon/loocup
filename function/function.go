@@ -25,7 +25,7 @@ func Make(retType, name string, args []FuncArg) Function {
 func MakeFromSignature(sig string) Function {
     openParenIndex := strings.IndexByte(sig, '(')
     retType := sig[:openParenIndex]
-    return Make(retType, "x", getArgs(sig))
+    return Make(strings.Trim(retType, " "), "x", getArgs(sig))
 }
 
 func MakeFromTokens(tokens []token.Token) Function {
