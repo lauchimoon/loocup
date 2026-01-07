@@ -1,6 +1,7 @@
 package parser
 
 import (
+//    "fmt"
     "slices"
 
     "github.com/lauchimoon/loocup/token"
@@ -12,8 +13,7 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
         return false, -1
     }
 
-    // TODO: check for modifiers like unsigned, signed...
-    if tokens[idx].Kind == token.TOKEN_KEYWORD && !isRelevantKeyword(tokens[idx].Value) {
+    if tokens[idx].Kind == token.TOKEN_KEYWORD && (!isTypeSpec(tokens[idx]) && tokens[idx].Value != "void") {
         return false, -1
     }
 
@@ -50,33 +50,20 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
         return false, -1
     }
 
-
     for tokens[idx].Kind != token.TOKEN_CLOSE_PAREN {
-        if tokens[idx].Kind == token.TOKEN_COMMA {
-            if tokens[idx + 1].Kind != token.TOKEN_SYMBOL && tokens[idx + 1].Kind != token.TOKEN_KEYWORD {
-                return false, -1
-            }
-
-            idx++
+        nextIdx := findCommaOrCloseParen(tokens[idx:])
+        if nextIdx == -1 {
+            return false, -1
         }
 
-        if isWord(tokens[idx]) {
-            if tokens[idx + 1].Kind == token.TOKEN_COMMA {
-                idx++ 
-            } else if tokens[idx + 1].Kind == token.TOKEN_CLOSE_PAREN {
-                idx++
-            } else if isWord(tokens[idx + 1]) {
-                if tokens[idx + 1].Kind == token.TOKEN_KEYWORD {
-                    return false, -1
-                }
+        args := tokens[idx:idx+nextIdx]
+        if !isValidArgs(args) {
+            return false, -1
+        }
 
-                if (idx + 2 >= len(tokens)) || (tokens[idx + 2].Kind != token.TOKEN_COMMA && tokens[idx + 2].Kind != token.TOKEN_CLOSE_PAREN) {
-                    return false, -1
-                }
-                idx += 2
-            } else {
-                return false, -1
-            }
+        idx += nextIdx
+        if tokens[idx].Kind == token.TOKEN_COMMA {
+            idx++
         }
     }
 
@@ -88,17 +75,54 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     return true, idx
 }
 
-func isRelevantKeyword(s string) bool {
+func isTypeSpec(t token.Token) bool {
     types := []string{
         "char", "double", "float",
         "int", "long", "short",
-        "void", "const", "unsigned",
-        "signed",
+        "const", "unsigned", "signed",
     }
 
-    return slices.Index[[]string, string](types, s) != -1
+    return slices.Index[[]string, string](types, t.Value) != -1
 }
 
 func isWord(t token.Token) bool {
-    return t.Kind == token.TOKEN_SYMBOL || (t.Kind == token.TOKEN_KEYWORD && isRelevantKeyword(t.Value))
+    return t.Kind == token.TOKEN_SYMBOL || (t.Kind == token.TOKEN_KEYWORD && (isTypeSpec(t) || t.Value == "void"))
+}
+
+func findCommaOrCloseParen(tokens []token.Token) int {
+    for i, t := range tokens {
+        if t.Kind == token.TOKEN_COMMA || t.Kind == token.TOKEN_CLOSE_PAREN {
+            return i
+        }
+    }
+
+    return -1
+}
+
+func isValidArgs(args []token.Token) bool {
+    counts := map[string]int{}
+    for _, arg := range args {
+        if isTypeSpec(arg) {
+            counts[arg.Value]++
+        }
+    }
+
+    // If we have more than one of these, it's forbidden
+    forbidden := []string{
+        "char", "short", "int", "signed",
+        "unsigned", "float", "double", "void", 
+
+    }
+
+    for _, kind := range forbidden {
+        if counts[kind] > 1 {
+            if kind == "long" && counts[kind] == 2 {
+                continue
+            }
+
+            return false
+        }
+    }
+
+    return true
 }
