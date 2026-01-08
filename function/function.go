@@ -6,7 +6,6 @@ import (
     "regexp"
 
     "github.com/lauchimoon/loocup/lexer"
-    "github.com/lauchimoon/loocup/parser"
     "github.com/lauchimoon/loocup/token"
 )
 
@@ -111,11 +110,8 @@ func formatType(tokens []token.Token) string {
     return strings.Trim(typ, " ")
 }
 
-func MakeFromTokens(tokens []token.Token) Function {
-    isFuncDecl, semicolonIndex := parser.IsFunctionDeclaration(tokens, 0)
-    if !isFuncDecl {
-        return Function{"", "", []FuncArg{}}
-    }
+func MakeFromDeclarationTokens(tokens []token.Token, semicolonIndex int) Function {
+    tokens = tokens[:semicolonIndex+1]
 
     openParenIndex := slices.Index[[]token.Token, token.Token](tokens, token.Token{
         Kind: token.OPEN_PAREN, Value: "(",
