@@ -30,8 +30,8 @@ func Make(retType, name string, args []FuncArg) Function {
 
 func MakeFromSignature(sig string) Function {
     tokens := lexer.LexerMake(sig).Lex()
-    openParenIndex := token.FindByKind(tokens, token.TOKEN_OPEN_PAREN)
-    closeParenIndex := token.FindByKind(tokens, token.TOKEN_CLOSE_PAREN)
+    openParenIndex := token.FindByKind(tokens, token.OPEN_PAREN)
+    closeParenIndex := token.FindByKind(tokens, token.CLOSE_PAREN)
     if openParenIndex == -1 || closeParenIndex == -1 {
         return Function{"", "", []FuncArg{}}
     }
@@ -56,14 +56,14 @@ func makeRetType(tokens []token.Token) string {
 
 func makeArgs(tokens []token.Token) []FuncArg {
     args := []FuncArg{}
-    if tokens[0].Kind != token.TOKEN_OPEN_PAREN || tokens[len(tokens)-1].Kind != token.TOKEN_CLOSE_PAREN {
+    if tokens[0].Kind != token.OPEN_PAREN || tokens[len(tokens)-1].Kind != token.CLOSE_PAREN {
         return nil
     }
 
     group := []token.Token{}
 
     for _, t := range tokens[1:len(tokens)] {
-        if t.Kind == token.TOKEN_COMMA || t.Kind == token.TOKEN_CLOSE_PAREN {
+        if t.Kind == token.COMMA || t.Kind == token.CLOSE_PAREN {
             args = append(args, buildArg(group))
             group = []token.Token{}
         } else {
@@ -118,7 +118,7 @@ func MakeFromTokens(tokens []token.Token) Function {
     }
 
     openParenIndex := slices.Index[[]token.Token, token.Token](tokens, token.Token{
-        Kind: token.TOKEN_OPEN_PAREN, Value: "(",
+        Kind: token.OPEN_PAREN, Value: "(",
     })
 
     retType := ""

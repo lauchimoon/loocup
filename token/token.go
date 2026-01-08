@@ -1,33 +1,34 @@
 package token
 
-type TokenKind int
+type Kind int
+
 const (
-    TOKEN_OPEN_PAREN = iota
-    TOKEN_CLOSE_PAREN
-    TOKEN_OPEN_CURLY
-    TOKEN_CLOSE_CURLY
-    TOKEN_OPEN_BRACKET
-    TOKEN_CLOSE_BRACKET
-    TOKEN_SEMICOLON
-    TOKEN_COMMA
-    TOKEN_OPERATOR
-    TOKEN_NEWLINE
-    TOKEN_ASTERISK
-    TOKEN_NUMBER
-    TOKEN_SYMBOL
-    TOKEN_KEYWORD
-    TOKEN_COMMENT
-    TOKEN_OPEN_MULTICOMMENT
-    TOKEN_CLOSE_MULTICOMMENT
-    TOKEN_PREPROC
+    OPEN_PAREN = iota
+    CLOSE_PAREN
+    OPEN_CURLY
+    CLOSE_CURLY
+    OPEN_BRACKET
+    CLOSE_BRACKET
+    SEMICOLON
+    COMMA
+    OPERATOR
+    NEWLINE
+    ASTERISK
+    NUMBER
+    SYMBOL
+    KEYWORD
+    COMMENT
+    OPEN_MULTICOMMENT
+    CLOSE_MULTICOMMENT
+    PREPROC
 )
 
 type Token struct {
-    Kind TokenKind
+    Kind Kind
     Value string
 }
 
-func FindByKind(tokens []Token, kind TokenKind) int {
+func FindByKind(tokens []Token, kind Kind) int {
     for i, t := range tokens {
         if t.Kind == kind {
             return i

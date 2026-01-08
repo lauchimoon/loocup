@@ -8,11 +8,11 @@ import (
 
 func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     idx := i
-    if idx >= len(tokens) || (tokens[idx].Kind != token.TOKEN_SYMBOL && tokens[idx].Kind != token.TOKEN_KEYWORD) {
+    if idx >= len(tokens) || (tokens[idx].Kind != token.SYMBOL && tokens[idx].Kind != token.KEYWORD) {
         return false, -1
     }
 
-    if tokens[idx].Kind == token.TOKEN_KEYWORD && (!isTypeSpec(tokens[idx]) && tokens[idx].Value != "void") {
+    if tokens[idx].Kind == token.KEYWORD && (!isTypeSpec(tokens[idx]) && tokens[idx].Value != "void") {
         return false, -1
     }
 
@@ -20,10 +20,10 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     idx++
 
     // In case we have pointers or something else
-    if tokens[idx].Kind != token.TOKEN_SYMBOL {
-        for idx < len(tokens) && tokens[idx].Kind != token.TOKEN_SYMBOL {
+    if tokens[idx].Kind != token.SYMBOL {
+        for idx < len(tokens) && tokens[idx].Kind != token.SYMBOL {
             // We found semicolon before another symbol or opening parenthesis.
-            if tokens[idx].Kind == token.TOKEN_SEMICOLON {
+            if tokens[idx].Kind == token.SEMICOLON {
                 return false, -1
             }
 
@@ -38,21 +38,21 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     // Move to '('
     idx++
 
-    if (tokens[idx].Kind != token.TOKEN_OPEN_PAREN) {
+    if (tokens[idx].Kind != token.OPEN_PAREN) {
         return false, -1
     }
 
     // Parse arguments
     idx++
 
-    if !isWord(tokens[idx]) && tokens[idx].Kind != token.TOKEN_CLOSE_PAREN {
+    if !isWord(tokens[idx]) && tokens[idx].Kind != token.CLOSE_PAREN {
         return false, -1
     }
 
-    for tokens[idx].Kind != token.TOKEN_CLOSE_PAREN {
-        nextIdx := token.FindByKind(tokens[idx:], token.TOKEN_COMMA)
+    for tokens[idx].Kind != token.CLOSE_PAREN {
+        nextIdx := token.FindByKind(tokens[idx:], token.COMMA)
         if nextIdx == -1 {
-            nextIdx = token.FindByKind(tokens[idx:], token.TOKEN_CLOSE_PAREN)
+            nextIdx = token.FindByKind(tokens[idx:], token.CLOSE_PAREN)
             if nextIdx == -1 {
                 return false, -1
             }
@@ -64,13 +64,13 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
         }
 
         idx += nextIdx
-        if tokens[idx].Kind == token.TOKEN_COMMA {
+        if tokens[idx].Kind == token.COMMA {
             idx++
         }
     }
 
     idx++
-    if idx >= len(tokens) || tokens[idx].Kind != token.TOKEN_SEMICOLON {
+    if idx >= len(tokens) || tokens[idx].Kind != token.SEMICOLON {
         return false, -1
     }
 
@@ -88,7 +88,7 @@ func isTypeSpec(t token.Token) bool {
 }
 
 func isWord(t token.Token) bool {
-    return t.Kind == token.TOKEN_SYMBOL || (t.Kind == token.TOKEN_KEYWORD && (isTypeSpec(t) || t.Value == "void"))
+    return t.Kind == token.SYMBOL || (t.Kind == token.KEYWORD && (isTypeSpec(t) || t.Value == "void"))
 }
 
 func isValidArgs(args []token.Token) bool {

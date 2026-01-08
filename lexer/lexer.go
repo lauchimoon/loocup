@@ -74,7 +74,7 @@ func (l *Lexer) Lex() []token.Token {
             }
 
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_NUMBER,
+                Kind: token.NUMBER,
                 Value: buffer.String(),
             })
         }
@@ -92,9 +92,9 @@ func (l *Lexer) Lex() []token.Token {
             }
 
             value := buffer.String()
-            var kind token.TokenKind = token.TOKEN_SYMBOL
+            var kind token.Kind = token.SYMBOL
             if isKeyword(value) {
-                kind = token.TOKEN_KEYWORD
+                kind = token.KEYWORD
             }
 
             tokens = append(tokens, token.Token{
@@ -110,12 +110,12 @@ func (l *Lexer) Lex() []token.Token {
                 l.Advance()
                 l.Advance()
                 tokens = append(tokens, token.Token{
-                    Kind: token.TOKEN_CLOSE_MULTICOMMENT,
+                    Kind: token.CLOSE_MULTICOMMENT,
                     Value: "*/",
                 })
             } else {
                 tokens = append(tokens, token.Token{
-                    Kind: token.TOKEN_ASTERISK,
+                    Kind: token.ASTERISK,
                     Value: "*",
                 })
             }
@@ -128,7 +128,7 @@ func (l *Lexer) Lex() []token.Token {
                 l.Advance()
                 l.Advance()
                 tokens = append(tokens, token.Token{
-                    Kind: token.TOKEN_COMMENT,
+                    Kind: token.COMMENT,
                     Value: "//",
                 })
 
@@ -143,14 +143,14 @@ func (l *Lexer) Lex() []token.Token {
                 }
 
                 tokens = append(tokens, token.Token{
-                    Kind: token.TOKEN_COMMENT,
+                    Kind: token.COMMENT,
                     Value: buffer.String(),
                 })
             } else if nextC == '*' {
                 l.Advance()
                 l.Advance()
                 tokens = append(tokens, token.Token{
-                    Kind: token.TOKEN_OPEN_MULTICOMMENT,
+                    Kind: token.OPEN_MULTICOMMENT,
                     Value: "/*",
                 })
 
@@ -163,7 +163,7 @@ func (l *Lexer) Lex() []token.Token {
         if c == '#' {
             l.Advance()
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_PREPROC,
+                Kind: token.PREPROC,
                 Value: "#",
             })
 
@@ -178,7 +178,7 @@ func (l *Lexer) Lex() []token.Token {
             }
 
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_PREPROC,
+                Kind: token.PREPROC,
                 Value: buffer.String(),
             })
         }
@@ -186,52 +186,52 @@ func (l *Lexer) Lex() []token.Token {
         // Others
         if c == '(' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_OPEN_PAREN,
+                Kind: token.OPEN_PAREN,
                 Value: "(",
             })
         } else if c == ')' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_CLOSE_PAREN,
+                Kind: token.CLOSE_PAREN,
                 Value: ")",
             })
         } else if c == '{' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_OPEN_CURLY,
+                Kind: token.OPEN_CURLY,
                 Value: "{",
             })
         } else if c == '}' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_CLOSE_CURLY,
+                Kind: token.CLOSE_CURLY,
                 Value: "}",
             })
         } else if c == '[' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_OPEN_BRACKET,
+                Kind: token.OPEN_BRACKET,
                 Value: "[",
             })
         } else if c == ']' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_CLOSE_BRACKET,
+                Kind: token.CLOSE_BRACKET,
                 Value: "]",
             })
         } else if c == ';' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_SEMICOLON,
+                Kind: token.SEMICOLON,
                 Value: ";",
             })
         } else if c == ',' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_COMMA,
+                Kind: token.COMMA,
                 Value: ",",
             })
         } else if isOperator(c) {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_OPERATOR,
+                Kind: token.OPERATOR,
                 Value: string(c),
             })
         } else if c == '\n' {
             tokens = append(tokens, token.Token{
-                Kind: token.TOKEN_NEWLINE,
+                Kind: token.NEWLINE,
                 Value: "\\n",
             })
         }
