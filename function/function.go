@@ -62,7 +62,12 @@ func makeArgs(tokens []token.Token) []FuncArg {
 
     for _, t := range tokens[1:len(tokens)] {
         if t.Kind == token.COMMA || t.Kind == token.CLOSE_PAREN {
-            args = append(args, buildArg(group))
+            arg := buildArg(group)
+            if len(arg.Type) == 0 && len(arg.Name) == 0 {
+                return []FuncArg{}
+            }
+
+            args = append(args, arg)
             group = []token.Token{}
         } else {
             group = append(group, t)
@@ -135,13 +140,21 @@ func (f Function) String() string {
     s := f.RetType + " " + f.Name + "("
     for i, arg := range f.Args {
         if i + 1 >= len(f.Args) {
-            s += arg.Type + " " + arg.Name
+            s += arg.Type + formatNameString(arg.Name)
         } else {
-            s += arg.Type + " " + arg.Name + ", "
+            s += arg.Type + formatNameString(arg.Name) + ", "
         }
     }
 
     return s + ");"
+}
+
+func formatNameString(name string) string {
+    if len(name) == 0 {
+        return ""
+    }
+
+    return " " + name
 }
 
 // Names don't matter for now. We only care about:
