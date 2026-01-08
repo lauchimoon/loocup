@@ -39,12 +39,14 @@ func LexerMake(src string) *Lexer {
 // We lex everything relevant, the parser takes care of it later
 func (l *Lexer) Lex() []token.Token {
     tokens := []token.Token{}
+    line := 1
+
     for l.Cursor < l.SourceLen {
         c := l.Current()
         buffer := strings.Builder{}
 
         // Skip whitespace
-        if unicode.IsSpace(rune(c)) {
+        if c != '\n' && unicode.IsSpace(rune(c)) {
             l.Advance()
             c = l.Current()
             for unicode.IsSpace(rune(c)) {
@@ -76,6 +78,7 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.NUMBER,
                 Value: buffer.String(),
+                Line: line,
             })
         }
 
@@ -100,6 +103,7 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: kind,
                 Value: value,
+                Line: line,
             })
         }
 
@@ -112,11 +116,13 @@ func (l *Lexer) Lex() []token.Token {
                 tokens = append(tokens, token.Token{
                     Kind: token.CLOSE_MULTICOMMENT,
                     Value: "*/",
+                    Line: line,
                 })
             } else {
                 tokens = append(tokens, token.Token{
                     Kind: token.ASTERISK,
                     Value: "*",
+                    Line: line,
                 })
             }
         }
@@ -130,6 +136,7 @@ func (l *Lexer) Lex() []token.Token {
                 tokens = append(tokens, token.Token{
                     Kind: token.COMMENT,
                     Value: "//",
+                    Line: line,
                 })
 
                 c = l.Current()
@@ -142,9 +149,14 @@ func (l *Lexer) Lex() []token.Token {
                     c = l.Current()
                 }
 
+                if c == '\n' {
+                    line++
+                }
+
                 tokens = append(tokens, token.Token{
                     Kind: token.COMMENT,
                     Value: buffer.String(),
+                    Line: line,
                 })
             } else if nextC == '*' {
                 l.Advance()
@@ -152,6 +164,7 @@ func (l *Lexer) Lex() []token.Token {
                 tokens = append(tokens, token.Token{
                     Kind: token.OPEN_MULTICOMMENT,
                     Value: "/*",
+                    Line: line,
                 })
 
                 c = l.Current()
@@ -165,6 +178,7 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.PREPROC,
                 Value: "#",
+                Line: line,
             })
 
             c = l.Current()
@@ -177,9 +191,14 @@ func (l *Lexer) Lex() []token.Token {
                 c = l.Current()
             }
 
+            if c == '\n' {
+                line++
+            }
+
             tokens = append(tokens, token.Token{
                 Kind: token.PREPROC,
                 Value: buffer.String(),
+                Line: line,
             })
         }
 
@@ -188,47 +207,58 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.OPEN_PAREN,
                 Value: "(",
+                Line: line,
             })
         } else if c == ')' {
             tokens = append(tokens, token.Token{
                 Kind: token.CLOSE_PAREN,
                 Value: ")",
+                Line: line,
             })
         } else if c == '{' {
             tokens = append(tokens, token.Token{
                 Kind: token.OPEN_CURLY,
                 Value: "{",
+                Line: line,
             })
         } else if c == '}' {
             tokens = append(tokens, token.Token{
                 Kind: token.CLOSE_CURLY,
                 Value: "}",
+                Line: line,
             })
         } else if c == '[' {
             tokens = append(tokens, token.Token{
                 Kind: token.OPEN_BRACKET,
                 Value: "[",
+                Line: line,
             })
         } else if c == ']' {
             tokens = append(tokens, token.Token{
                 Kind: token.CLOSE_BRACKET,
                 Value: "]",
+                Line: line,
             })
         } else if c == ';' {
             tokens = append(tokens, token.Token{
                 Kind: token.SEMICOLON,
                 Value: ";",
+                Line: line,
             })
         } else if c == ',' {
             tokens = append(tokens, token.Token{
                 Kind: token.COMMA,
                 Value: ",",
+                Line: line,
             })
         } else if isOperator(c) {
             tokens = append(tokens, token.Token{
                 Kind: token.OPERATOR,
                 Value: string(c),
+                Line: line,
             })
+        } else if c == '\n' {
+            line++
         }
 
         l.Advance()

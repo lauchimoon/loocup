@@ -23,8 +23,9 @@ const (
 )
 
 type Token struct {
-    Kind Kind
+    Kind  Kind
     Value string
+    Line  int
 }
 
 func FindByKind(tokens []Token, kind Kind) int {
