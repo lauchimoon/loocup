@@ -109,7 +109,7 @@ func formatType(tokens []token.Token) string {
     return strings.Trim(typ, " ")
 }
 
-func MakeFromDeclarationTokens(tokens []token.Token, semicolonIndex int) Function {
+func MakeFromDeclarationTokens(tokens []token.Token) Function {
     openParenIndex := token.FindByKind(tokens, token.OPEN_PAREN)
     retType := ""
     for _, t := range tokens[:openParenIndex - 1] {
@@ -118,6 +118,7 @@ func MakeFromDeclarationTokens(tokens []token.Token, semicolonIndex int) Functio
 
     name := tokens[openParenIndex - 1].Value
     args := ""
+    semicolonIndex := token.FindByKind(tokens, token.SEMICOLON)
     argList := tokens[openParenIndex + 1:semicolonIndex]
     for _, arg := range argList {
         args += arg.Value + " "
