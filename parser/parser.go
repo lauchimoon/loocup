@@ -50,22 +50,22 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     }
 
     for tokens[idx].Kind != token.CLOSE_PAREN {
-        nextIdx := token.FindByKind(tokens[idx:], token.COMMA)
-        if nextIdx == -1 {
-            nextIdx = token.FindByKind(tokens[idx:], token.CLOSE_PAREN)
-            if nextIdx == -1 {
-                return false, -1
-            }
+        argStart := idx
+
+        for idx < len(tokens) && tokens[idx].Kind != token.COMMA && tokens[idx].Kind != token.CLOSE_PAREN {
+            idx++
         }
 
-        args := tokens[idx:idx+nextIdx]
+        args := tokens[argStart:idx]
         if !isValidArgs(args) {
             return false, -1
         }
 
-        idx += nextIdx
-        if tokens[idx].Kind == token.COMMA {
+        if idx < len(tokens) && tokens[idx].Kind == token.COMMA {
             idx++
+            if tokens[idx].Kind == token.CLOSE_PAREN {
+                return false, -1
+            }
         }
     }
 
