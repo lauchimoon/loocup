@@ -12,7 +12,6 @@ const (
     SEMICOLON
     COMMA
     OPERATOR
-    NEWLINE
     ASTERISK
     NUMBER
     SYMBOL

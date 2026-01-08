@@ -44,7 +44,7 @@ func (l *Lexer) Lex() []token.Token {
         buffer := strings.Builder{}
 
         // Skip whitespace
-        if c != '\n' && unicode.IsSpace(rune(c)) {
+        if unicode.IsSpace(rune(c)) {
             l.Advance()
             c = l.Current()
             for unicode.IsSpace(rune(c)) {
@@ -228,11 +228,6 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.OPERATOR,
                 Value: string(c),
-            })
-        } else if c == '\n' {
-            tokens = append(tokens, token.Token{
-                Kind: token.NEWLINE,
-                Value: "\\n",
             })
         }
 
