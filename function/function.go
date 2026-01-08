@@ -1,7 +1,6 @@
 package function
 
 import (
-    "slices"
     "strings"
     "regexp"
 
@@ -111,12 +110,7 @@ func formatType(tokens []token.Token) string {
 }
 
 func MakeFromDeclarationTokens(tokens []token.Token, semicolonIndex int) Function {
-    tokens = tokens[:semicolonIndex+1]
-
-    openParenIndex := slices.Index[[]token.Token, token.Token](tokens, token.Token{
-        Kind: token.OPEN_PAREN, Value: "(",
-    })
-
+    openParenIndex := token.FindByKind(tokens, token.OPEN_PAREN)
     retType := ""
     for _, t := range tokens[:openParenIndex - 1] {
         retType += t.Value + " "
