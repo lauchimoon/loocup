@@ -9,7 +9,7 @@ import (
 
 func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     idx := i
-    if tokens[idx].Kind != token.TOKEN_SYMBOL && tokens[idx].Kind != token.TOKEN_KEYWORD {
+    if idx >= len(tokens) || (tokens[idx].Kind != token.TOKEN_SYMBOL && tokens[idx].Kind != token.TOKEN_KEYWORD) {
         return false, -1
     }
 
@@ -51,9 +51,12 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     }
 
     for tokens[idx].Kind != token.TOKEN_CLOSE_PAREN {
-        nextIdx := findCommaOrCloseParen(tokens[idx:])
+        nextIdx := token.FindByKind(tokens[idx:], token.TOKEN_COMMA)
         if nextIdx == -1 {
-            return false, -1
+            nextIdx = token.FindByKind(tokens[idx:], token.TOKEN_CLOSE_PAREN)
+            if nextIdx == -1 {
+                return false, -1
+            }
         }
 
         args := tokens[idx:idx+nextIdx]
@@ -87,16 +90,6 @@ func isTypeSpec(t token.Token) bool {
 
 func isWord(t token.Token) bool {
     return t.Kind == token.TOKEN_SYMBOL || (t.Kind == token.TOKEN_KEYWORD && (isTypeSpec(t) || t.Value == "void"))
-}
-
-func findCommaOrCloseParen(tokens []token.Token) int {
-    for i, t := range tokens {
-        if t.Kind == token.TOKEN_COMMA || t.Kind == token.TOKEN_CLOSE_PAREN {
-            return i
-        }
-    }
-
-    return -1
 }
 
 func isValidArgs(args []token.Token) bool {

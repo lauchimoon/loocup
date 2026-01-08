@@ -26,3 +26,13 @@ type Token struct {
     Kind TokenKind
     Value string
 }
+
+func FindByKind(tokens []Token, kind TokenKind) int {
+    for i, t := range tokens {
+        if t.Kind == kind {
+            return i
+        }
+    }
+
+    return -1
+}
