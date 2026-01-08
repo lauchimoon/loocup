@@ -3,9 +3,15 @@ package function
 import (
     "slices"
     "strings"
+    "regexp"
 
+    "github.com/lauchimoon/loocup/lexer"
     "github.com/lauchimoon/loocup/parser"
     "github.com/lauchimoon/loocup/token"
+)
+
+var (
+    identifierMatcher = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 )
 
 type Function struct {
@@ -22,11 +28,87 @@ func Make(retType, name string, args []FuncArg) Function {
     }
 }
 
-// TODO: use lexer for this.
 func MakeFromSignature(sig string) Function {
-    openParenIndex := strings.IndexByte(sig, '(')
-    retType := sig[:openParenIndex]
-    return Make(strings.Trim(retType, " "), "x", getArgs(sig))
+    tokens := lexer.LexerMake(sig).Lex()
+    openParenIndex := token.FindByKind(tokens, token.TOKEN_OPEN_PAREN)
+    closeParenIndex := token.FindByKind(tokens, token.TOKEN_CLOSE_PAREN)
+    if openParenIndex == -1 || closeParenIndex == -1 {
+        return Function{"", "", []FuncArg{}}
+    }
+
+    retType := makeRetType(tokens[:openParenIndex])
+    args := makeArgs(tokens[openParenIndex:closeParenIndex+1])
+    if args == nil {
+        return Function{"", "", []FuncArg{}}
+    }
+
+    return Make(strings.Trim(retType, " "), "x", args)
+}
+
+func makeRetType(tokens []token.Token) string {
+    retType := ""
+    for _, t := range tokens {
+        retType += t.Value + " "
+    }
+
+    return retType
+}
+
+func makeArgs(tokens []token.Token) []FuncArg {
+    args := []FuncArg{}
+    if tokens[0].Kind != token.TOKEN_OPEN_PAREN || tokens[len(tokens)-1].Kind != token.TOKEN_CLOSE_PAREN {
+        return nil
+    }
+
+    group := []token.Token{}
+
+    for _, t := range tokens[1:len(tokens)] {
+        if t.Kind == token.TOKEN_COMMA || t.Kind == token.TOKEN_CLOSE_PAREN {
+            args = append(args, buildArg(group))
+            group = []token.Token{}
+        } else {
+            group = append(group, t)
+        }
+    }
+
+    return args
+}
+
+func buildArg(tokens []token.Token) FuncArg {
+    if len(tokens) == 0 {
+        return FuncArg{}
+    }
+
+    lastIdx := len(tokens) - 1
+    lastToken := tokens[lastIdx]
+    if len(tokens) > 1 && isName(lastToken) {
+        return FuncArgMake(
+            formatType(tokens[:lastIdx]),
+            lastToken.Value,
+        )
+    }
+
+    typ := formatType(tokens[:lastIdx + 1])
+    return FuncArgMake(typ, "")
+}
+
+func isName(t token.Token) bool {
+    excludeSymbols := "[]*&."
+    if strings.ContainsAny(t.Value, excludeSymbols) {
+        return false
+    }
+
+    return identifierMatcher.MatchString(t.Value)
+}
+
+func formatType(tokens []token.Token) string {
+    tokensString := []string{}
+    for _, t := range tokens {
+        tokensString = append(tokensString, t.Value)
+    }
+
+    typ := strings.Join(tokensString, " ")
+    return strings.Trim(typ, " ")
 }
 
 func MakeFromTokens(tokens []token.Token) Function {
@@ -56,32 +138,6 @@ func MakeFromTokens(tokens []token.Token) Function {
     f.Name = name
 
     return f
-}
-
-func getArgs(sig string) []FuncArg {
-    openParenIndex := strings.IndexByte(sig, '(')
-    closeParenIndex := strings.IndexByte(sig, ')')
-    argsSig := sig[openParenIndex+1:closeParenIndex]
-
-    args := []FuncArg{}
-    for _, arg := range strings.Split(argsSig, ",") {
-        fields := strings.Fields(strings.Trim(arg, " "))
-        if len(fields) < 1 {
-            continue
-        }
-
-        argType := fields[0]
-        var argName string
-
-        // TODO: check for pointers, like int *...
-        if len(fields) >= 2 {
-            argName = fields[1]
-        }
-
-        args = append(args, FuncArgMake(argType, argName))
-    }
-
-    return args
 }
 
 func (f Function) String() string {
