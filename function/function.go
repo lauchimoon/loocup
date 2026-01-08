@@ -22,6 +22,7 @@ func Make(retType, name string, args []FuncArg) Function {
     }
 }
 
+// TODO: use lexer for this.
 func MakeFromSignature(sig string) Function {
     openParenIndex := strings.IndexByte(sig, '(')
     retType := sig[:openParenIndex]
@@ -38,7 +39,6 @@ func MakeFromTokens(tokens []token.Token) Function {
         Kind: token.TOKEN_OPEN_PAREN, Value: "(",
     })
 
-    // TODO: consider modifiers like unsigned, signed, pointers...
     retType := ""
     for _, t := range tokens[:openParenIndex - 1] {
         retType += t.Value + " "
@@ -47,10 +47,8 @@ func MakeFromTokens(tokens []token.Token) Function {
     name := tokens[openParenIndex - 1].Value
     args := ""
     argList := tokens[openParenIndex + 1:semicolonIndex]
-    i := 0
-    for i < len(argList) - 1 {
-        args += argList[i].Value + " "
-        i++
+    for _, arg := range argList {
+        args += arg.Value + " "
     }
 
     fString := retType + "(" + args + ")"
