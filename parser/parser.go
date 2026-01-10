@@ -6,8 +6,9 @@ import (
     "github.com/lauchimoon/loocup/token"
 )
 
-func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
-    idx := i
+func IsFunctionDeclaration(tokens []token.Token, start int) (bool, int) {
+    idx := start
+
     if idx >= len(tokens) || (tokens[idx].Kind != token.SYMBOL && tokens[idx].Kind != token.KEYWORD) {
         return false, -1
     }
