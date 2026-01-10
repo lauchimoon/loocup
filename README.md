@@ -9,3 +9,10 @@ $ git clone https://github.com/lauchimoon/loocup.git
 $ cd loocup/
 $ go build .
 ```
+
+## Usage
+```sh
+loocup <signature> <file>
+  <signature> looks like type(arg1, arg2, ..., argN)
+  <file> is a .c file or .h file
+```
