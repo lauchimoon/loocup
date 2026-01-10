@@ -20,15 +20,13 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
     idx++
 
     // In case we have pointers or something else
-    if tokens[idx].Kind != token.SYMBOL {
-        for idx < len(tokens) && tokens[idx].Kind != token.SYMBOL {
-            // We found semicolon before another symbol or opening parenthesis.
-            if tokens[idx].Kind == token.SEMICOLON {
-                return false, -1
-            }
-
-            idx++
+    for idx < len(tokens) && tokens[idx + 1].Kind != token.OPEN_PAREN {
+        // We found semicolon before another symbol or opening parenthesis.
+        if tokens[idx].Kind == token.SEMICOLON {
+            return false, -1
         }
+
+        idx++
     }
 
     if idx >= len(tokens) {
@@ -79,6 +77,7 @@ func IsFunctionDeclaration(tokens []token.Token, i int) (bool, int) {
 
 func isTypeSpec(t token.Token) bool {
     types := []string{
+        "extern",
         "char", "double", "float",
         "int", "long", "short",
         "const", "unsigned", "signed",
