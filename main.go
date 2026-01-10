@@ -4,6 +4,7 @@ import (
     "fmt"
     "strings"
     "os"
+    "path"
 
     "github.com/lauchimoon/loocup/lexer"
     "github.com/lauchimoon/loocup/token"
@@ -24,16 +25,21 @@ func main() {
     // TODO: use golang flag package
     if len(os.Args) < 3 {
         usage()
-        os.Exit(1)
+        return
     }
 
     signature := os.Args[1]
     filePath := os.Args[2]
 
+    if !checkExtension(filePath) {
+        fmt.Printf("%s: '%s' is not a C file (requires .c or .h extension)\n", PROGRAM_NAME, filePath)
+        return
+    }
+
     program, err := os.ReadFile(filePath)
     if err != nil {
         fmt.Printf("%s: %v\n", PROGRAM_NAME, err)
-        os.Exit(1)
+        return
     }
 
     // TODO: We use this to show it exactly as it's written. It may change
@@ -52,6 +58,11 @@ func usage() {
     fmt.Printf("usage: %s <signature> <file>\n", PROGRAM_NAME)
     fmt.Printf("  <signature> looks like type(arg1, arg2, ..., argN)\n")
     fmt.Printf("  <file> is a .c file or .h file\n")
+}
+
+func checkExtension(s string) bool {
+    ext := path.Ext(s)
+    return ext == ".c" || ext == ".h"
 }
 
 func CollectFunctionDeclarations(program string) []Result {
