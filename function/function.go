@@ -137,7 +137,7 @@ func MakeFromDeclarationTokens(tokens []token.Token) Function {
 }
 
 func (f Function) String() string {
-    s := f.RetType + " " + f.Name + "("
+    s := formatTypeString(f.RetType) + f.Name + "("
     for i, arg := range f.Args {
         if i + 1 >= len(f.Args) {
             s += arg.Type + formatNameString(arg.Name)
@@ -147,6 +147,15 @@ func (f Function) String() string {
     }
 
     return s + ");"
+}
+
+func formatTypeString(retType string) string {
+    // TODO: are there any other cases?
+    if strings.Contains(retType, " ") {
+        return retType
+    }
+
+    return retType + " "
 }
 
 func formatNameString(name string) string {

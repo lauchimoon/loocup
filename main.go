@@ -2,7 +2,6 @@ package main
 
 import (
     "fmt"
-    "strings"
     "os"
     "path"
 
@@ -42,14 +41,11 @@ func main() {
         return
     }
 
-    // TODO: We use this to show it exactly as it's written. It may change
-    programSplit := strings.Split(string(program), "\n")
     target := function.MakeFromSignature(signature)
     declarations := CollectFunctionDeclarations(string(program))
     for _, decl := range declarations {
         if decl.Func.MatchesCriteria(target) {
-            line := decl.LineAt - 1
-            fmt.Printf("%s:%d: %s\n", filePath, decl.LineAt, programSplit[line])
+            fmt.Printf("%s:%d: %v\n", filePath, decl.LineAt, decl.Func)
         }
     }
 }
