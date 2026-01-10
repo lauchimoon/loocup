@@ -20,6 +20,8 @@ var (
         "struct", "switch", "typedef", "union",
         "unsigned", "void", "volatile", "while",
     }
+
+    lineCount = 1
 )
 
 type Lexer struct {
@@ -39,8 +41,6 @@ func LexerMake(src string) *Lexer {
 // We lex everything relevant, the parser takes care of it later
 func (l *Lexer) Lex() []token.Token {
     tokens := []token.Token{}
-    line := 1
-
     for l.Cursor < l.SourceLen {
         c := l.Current()
         buffer := strings.Builder{}
@@ -78,7 +78,7 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.NUMBER,
                 Value: buffer.String(),
-                Line: line,
+                Line: lineCount,
             })
         }
 
@@ -103,11 +103,11 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: kind,
                 Value: value,
-                Line: line,
+                Line: lineCount,
             })
         }
 
-        // Multi-line comments or asterisk
+        // Multi-lineCount comments or asterisk
         if c == '*' {
             nextC, _ := l.Peek()
             if nextC == '/' {
@@ -116,13 +116,13 @@ func (l *Lexer) Lex() []token.Token {
                 tokens = append(tokens, token.Token{
                     Kind: token.CLOSE_MULTICOMMENT,
                     Value: "*/",
-                    Line: line,
+                    Line: lineCount,
                 })
             } else {
                 tokens = append(tokens, token.Token{
                     Kind: token.ASTERISK,
                     Value: "*",
-                    Line: line,
+                    Line: lineCount,
                 })
             }
         }
@@ -136,7 +136,7 @@ func (l *Lexer) Lex() []token.Token {
                 tokens = append(tokens, token.Token{
                     Kind: token.COMMENT,
                     Value: "//",
-                    Line: line,
+                    Line: lineCount,
                 })
 
                 c = l.Current()
@@ -149,14 +149,10 @@ func (l *Lexer) Lex() []token.Token {
                     c = l.Current()
                 }
 
-                if c == '\n' {
-                    line++
-                }
-
                 tokens = append(tokens, token.Token{
                     Kind: token.COMMENT,
                     Value: buffer.String(),
-                    Line: line,
+                    Line: lineCount,
                 })
             } else if nextC == '*' {
                 l.Advance()
@@ -164,7 +160,7 @@ func (l *Lexer) Lex() []token.Token {
                 tokens = append(tokens, token.Token{
                     Kind: token.OPEN_MULTICOMMENT,
                     Value: "/*",
-                    Line: line,
+                    Line: lineCount,
                 })
 
                 c = l.Current()
@@ -172,13 +168,13 @@ func (l *Lexer) Lex() []token.Token {
         }
 
         // Preprocessor directives
-        // TODO: support multi-line preprocessor directives (macros...)
+        // TODO: support multi-lineCount preprocessor directives (macros...)
         if c == '#' {
             l.Advance()
             tokens = append(tokens, token.Token{
                 Kind: token.PREPROC,
                 Value: "#",
-                Line: line,
+                Line: lineCount,
             })
 
             c = l.Current()
@@ -191,14 +187,10 @@ func (l *Lexer) Lex() []token.Token {
                 c = l.Current()
             }
 
-            if c == '\n' {
-                line++
-            }
-
             tokens = append(tokens, token.Token{
                 Kind: token.PREPROC,
                 Value: buffer.String(),
-                Line: line,
+                Line: lineCount,
             })
         }
 
@@ -207,58 +199,56 @@ func (l *Lexer) Lex() []token.Token {
             tokens = append(tokens, token.Token{
                 Kind: token.OPEN_PAREN,
                 Value: "(",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == ')' {
             tokens = append(tokens, token.Token{
                 Kind: token.CLOSE_PAREN,
                 Value: ")",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == '{' {
             tokens = append(tokens, token.Token{
                 Kind: token.OPEN_CURLY,
                 Value: "{",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == '}' {
             tokens = append(tokens, token.Token{
                 Kind: token.CLOSE_CURLY,
                 Value: "}",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == '[' {
             tokens = append(tokens, token.Token{
                 Kind: token.OPEN_BRACKET,
                 Value: "[",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == ']' {
             tokens = append(tokens, token.Token{
                 Kind: token.CLOSE_BRACKET,
                 Value: "]",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == ';' {
             tokens = append(tokens, token.Token{
                 Kind: token.SEMICOLON,
                 Value: ";",
-                Line: line,
+                Line: lineCount,
             })
         } else if c == ',' {
             tokens = append(tokens, token.Token{
                 Kind: token.COMMA,
                 Value: ",",
-                Line: line,
+                Line: lineCount,
             })
         } else if isOperator(c) {
             tokens = append(tokens, token.Token{
                 Kind: token.OPERATOR,
                 Value: string(c),
-                Line: line,
+                Line: lineCount,
             })
-        } else if c == '\n' {
-            line++
         }
 
         l.Advance()
@@ -270,6 +260,10 @@ func (l *Lexer) Lex() []token.Token {
 func (l *Lexer) Advance() {
     if (l.Cursor + 1 > l.SourceLen) {
         return
+    }
+
+    if l.Source[l.Cursor] == '\n' {
+        lineCount++
     }
 
     l.Cursor++
